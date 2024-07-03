@@ -1,17 +1,19 @@
-// Book.js
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-const Book = () => {
+const Book = ({ route }) => {
   const navigation = useNavigation();
+  const { selectedBabysitters } = route.params; // Modify to receive babysitterIds instead of babysitterId
 
   const handleOneTimeOrder = () => {
-    navigation.navigate('OneTime');
+    navigation.navigate('OneTime', { selectedBabysitters });
+    console.log('selectedBabysitterIds:', selectedBabysitters);
+    // Pass the babysitterIds to OneTime component
   };
 
   const handleContractOrder = () => {
-    navigation.navigate('Contract');
+    navigation.navigate('Contract', { selectedBabysitters }); // Pass the babysitterIds to Contract component
   };
 
   return (
@@ -32,6 +34,7 @@ const Book = () => {
     </ImageBackground>
   );
 };
+
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
@@ -39,26 +42,39 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   overlay: {
-   //backgroundColor: '#556b8d',
-   // backgroundColor: 'rgba(173, 216, 230, 0.8)', // Baby Blue with opacity
+    backgroundColor: 'rgba(255, 240, 236, 0.8)', // Soft overlay color
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   centerContainer: {
-    backgroundColor: '#fff0ec', // Baby Pink
+    backgroundColor: '#fff0ec', // Soft pink background
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 20,
+    width: '90%', // Adjust width
+    alignItems: 'center',
+    shadowColor: '#000', // Shadow effect
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   button: {
-    backgroundColor: '#c2274b', // Baby Pink
-    padding: 10,
-    marginVertical: 10,
-    borderRadius: 5,
+    backgroundColor: '#c2274b', // Deep pink color for contrast
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    marginVertical: 15,
+    borderRadius: 25,
+    shadowColor: '#000', // Button shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
+    // fontFamily: 'AvenirNext-DemiBold', // Custom font
     textAlign: 'center',
   },
 });

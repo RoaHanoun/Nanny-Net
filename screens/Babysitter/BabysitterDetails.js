@@ -1,73 +1,118 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons'; // You might need to install this package
+import axios from 'axios';
 
 const BabysitterDetails = ({ route, navigation }) => {
-  // Extract the babysitterId from the navigation route params
   const { babysitterId } = route.params;
+  const [babysitterDetails, setBabysitterDetails] = useState(null);
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
 
-  // Dummy data for babysitter details
-  const babysitterDetails = {
-    '1': { name: 'Roa Hanoun', city: 'Nablus ', country: 'Palestine', bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', hourlySalary: '$15' },
-    '2': { name: 'Malak', city: 'Ramallah ', country: 'Palestine', bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', hourlySalary: '$20' },
-    '10': { name: 'Babysitter 3', city: 'City 3', country: 'Country 3', bio: 'Bio for Babysitter 3', hourlySalary: '$18' },
-    '4': { name: 'Babysitter 4', city: 'City 4', country: 'Country 4', bio: 'Bio for Babysitter 4', hourlySalary: '$22' },
-    '5': { name: 'Babysitter 5', city: 'City 5', country: 'Country 5', bio: 'Bio for Babysitter 5', hourlySalary: '$17' },
-    '6': { name: 'Babysitter 6', city: 'City 6', country: 'Country 6', bio: 'Bio for Babysitter 6', hourlySalary: '$19' },
-    '7': { name: 'Babysitter 7', city: 'City 7', country: 'Country 7', bio: 'Bio for Babysitter 7', hourlySalary: '$21' },
-    '8': { name: 'Babysitter 8', city: 'City 8', country: 'Country 8', bio: 'Bio for Babysitter 8', hourlySalary: '$16' },
-    '9': { name: 'Babysitter 9', city: 'City 9', country: 'Country 9', bio: 'Bio for Babysitter 9', hourlySalary: '$20' },
-    '3': { name: 'Saliba', city: 'Betlahem ', country: 'Palestine ', bio: 'Bio for Saliba ', hourlySalary: '$50' },
+  useEffect(() => {
+    fetchData();
+    fetchProfileImage();
+
+  }, []);
+
+  const fetchProfileImage = async () => {
+    try {
+      if (babysitterId) {
+        console.log(`Fetching profile image for babysitter ID: ${babysitterId}`);
+        const responseImage = await fetch(`http://176.119.254.188:8080/user/image/${babysitterId}`);
+        
+        if (responseImage.ok) {
+          const imageData = await responseImage.blob(); // Convert response to Blob
+          const base64Image = await convertBlobToBase64(imageData); // Convert Blob to base64
+          setProfileImageUrl(`data:image/jpeg;base64,${base64Image}`); // Use base64 string as image source
+          console.log('Profile image fetched successfully.');
+        } else {
+          // console.error('Failed to fetch profile image');
+          setProfileImageUrl(null); // Fallback to default image
+        }
+      } else {
+        console.warn('Babysitter ID not provided.');
+      }
+    } catch (error) {
+      console.error('Error fetching profile image:', error);
+      Alert.alert('Error', 'An unexpected error occurred while fetching profile image. Please try again later.');
+    }
   };
 
-  // Get the details for the selected babysitter
-  const selectedBabysitter = babysitterDetails[babysitterId];
+  const convertBlobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64data = reader.result.split(',')[1]; // Extract base64 string
+        resolve(base64data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(`http://176.119.254.188:8080/employee/${babysitterId}`);
+      setBabysitterDetails(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
-  const handleBookNow = () => {
-    // Navigate to the confirmation screen
-    navigation.navigate('Book', {
+  const handleSeeFeedback = () => {
+    navigation.navigate('BabysitterFeedback', {
       babysitterId,
-      babysitterName: selectedBabysitter.name,
     });
   };
 
   return (
     <View style={styles.container}>
-      {/* Cover photo */}
       <Image
-        source={require('../../assets/123.jpg')} // Replace with your cover photo
+        source={require('../../assets/123.jpg')}
         style={styles.coverImage}
         resizeMode="cover"
       />
 
-      {/* Profile photo */}
-      <View style={styles.profileImageContainer}>
+<View style={styles.profileImageContainer}>
         <Image
-          source={require('../../assets/Profile.jpg')} // Replace with your profile photo
+          source={profileImageUrl ? { uri: profileImageUrl } : require('../../assets/Profile.jpg')}
           style={styles.profileImage}
-          resizeMode="cover"
         />
       </View>
 
-      {/* Name */}
-      <Text style={styles.name}>{selectedBabysitter.name}</Text>
+      <Text style={styles.name}>{babysitterDetails?.user?.name}</Text>
+      <Text style={styles.TextEmail}>{babysitterDetails?.user?.email}</Text>
 
-      {/* Babysitter details */}
       <View style={styles.babysitterCard}>
         <Text style={styles.infoTitle}>Location</Text>
-        <Text style={styles.infoText}>{`${selectedBabysitter.city}, ${selectedBabysitter.country}`}</Text>
+        <Text style={styles.infoText}>{babysitterDetails?.city}</Text>
 
         <Text style={styles.infoTitle}>Bio</Text>
-        <Text style={styles.infoText}>{selectedBabysitter.bio}</Text>
+        <Text style={styles.infoText}>{babysitterDetails?.user?.describtion}</Text>
 
-        <Text style={styles.infoTitle}>Hourly Salary</Text>
-        <Text style={styles.infoText}>{selectedBabysitter.hourlySalary}</Text>
+        {/* <Text style={styles.infoTitle}>Hourly Salary</Text> */}
+        {/* <Text style={styles.infoText}>{babysitterDetails?.hourlySalary}</Text> */}
+
+        <Text style={styles.infoTitle}>Availability</Text>
+        <Text style={styles.infoText}>{babysitterDetails?.availability}</Text>
+
+        <Text style={styles.infoTitle}>Type</Text>
+        <Text style={styles.infoText}>{babysitterDetails?.type}</Text>
+
+        {/* <Text style={styles.infoTitle}>Gender</Text>
+        <Text style={styles.infoText}>{babysitterDetails?.user?.gender}</Text> */}
+
+        <Text style={styles.infoTitle}>Stars</Text>
+        <View style={styles.starsContainer}>
+          {babysitterDetails?.stars && [...Array(Math.floor(babysitterDetails.stars))].map((_, index) => (
+            <FontAwesome key={index} name="star" size={20} color="#c2274b" style={{ marginRight: 5 }} />
+          ))}
+        </View>
       </View>
 
-      {/* "Book Now" button with icon */}
-      <TouchableOpacity style={styles.bookNowButton} onPress={handleBookNow}>
-        <FontAwesome name="send" size={20} color="#fff" />
-        <Text style={styles.bookNowButtonText}>Book Now</Text>
+      <TouchableOpacity style={styles.seeFeedbackButton} onPress={handleSeeFeedback}>
+        <FontAwesome name="comments" size={20} color="#fff" />
+        <Text style={styles.seeFeedbackButtonText}>See Their Feedback</Text>
       </TouchableOpacity>
     </View>
   );
@@ -84,20 +129,26 @@ const styles = StyleSheet.create({
   },
   profileImageContainer: {
     alignItems: 'center',
-    marginTop: -50, // Adjust to center the profile image over the cover photo
+    marginTop: -50,
   },
   profileImage: {
     width: 100,
     height: 100,
     borderRadius: 50,
     borderWidth: 3,
-    borderColor: '#fff', // White border for the profile image
+    borderColor: '#fff',
   },
   name: {
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginVertical: 10,
+    marginTop: 10,
+  },
+  TextEmail: {
+    fontSize: 14, 
+    fontWeight: 'bold',
+    color: '#c2274b',
+    textAlign: 'center',
   },
   babysitterCard: {
     padding: 16,
@@ -114,23 +165,28 @@ const styles = StyleSheet.create({
   },
   infoText: {
     color: '#556b8d',
+    marginBottom: 5,
+  },
+  starsContainer: {
+    flexDirection: 'row',
     marginBottom: 10,
   },
-  bookNowButton: {
+  seeFeedbackButton: {
     backgroundColor: '#c2274b',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 20,
     marginTop: 20,
+    width: '80%',
+    alignSelf: 'center',
   },
-  bookNowButtonText: {
+  seeFeedbackButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
-    marginLeft: 30,
-
+    marginLeft: 10,
   },
 });
 

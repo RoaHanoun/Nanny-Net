@@ -1,76 +1,123 @@
-import React, { useState } from 'react';
-import { View, Image, Text, TextInput, TouchableOpacity, FlatList } from 'react-native';
-import Styles from '../Babysitter/Stayles'; // Import styles from the separate file
-import Footer from '../Footer/Footer'; // Import the Footer component
-import Nav from '../Navbar/Nav'; // Import the Navbar component
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Image,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  Alert,
+} from 'react-native';
+import Footer from '../Footer/Footer';
+import axios from 'axios';
+import { MaterialIcons } from '@expo/vector-icons';
+import Styles from '../Babysitter/Stayles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Babysitter = ({ navigation }) => {
-  // Dummy data for suggested babysitters
-  const suggestedBabysitters = [
-    { id: '1', name: 'Roa Hanoun ', city: 'Nablus 1', country: 'Palestine' },
-    { id: '2', name: 'Malak ', city: 'Ramallah 2', country: 'Palestine' },
-     { id: '3', name: 'Saliba', city: 'Betlahem', country: 'Palestine' },
-    // Add more babysitters as needed
-  ];
+  const [babysitters, setBabysitters] = useState([]);
+  const [selectedBabysitters, setSelectedBabysitters] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const [searchText, setSearchText] = useState('');
-  const filteredBabysitters = suggestedBabysitters.filter((babysitter) =>
-    babysitter.name.toLowerCase().includes(searchText.toLowerCase())
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchData();
+    }, [])
   );
 
-  const navigateToBabysitterDetails = (babysitterId) => {
-    // Navigate to the babysitter details screen, pass the babysitterId as a parameter
-    navigation.navigate('BabysitterDetails', { babysitterId });
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('http://176.119.254.188:8080/admin/getAllEmployees');
+      setBabysitters(response.data);
+    } catch (error) {
+      console.error('Error fetching suggested babysitters:', error);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const token = await AsyncStorage.getItem('jwt');
+      const response = await axios.get('http://176.119.254.188:8080/user/notifications/all', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setNotifications(response.data.slice(-4));
+      setModalVisible(true);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
   };
 
   return (
-    <View style={Styles.container}>
-      {/* <Nav/> */}
-      {/* Image at the top */}
-      <Image
-        source={require('../../assets/123.jpg')}
-        style={Styles.coverImage}
-        resizeMode="cover"
-      />
-
-      {/* Search box for name */}
-      <View style={Styles.searchContainer}>
-        <Text style={Styles.Title}>Available Babysitter</Text>
-        <TextInput
-          style={Styles.searchInput}
-          placeholder="Search by Name"
-          onChangeText={(text) => setSearchText(text)}
-          value={searchText}
+    <ScrollView contentContainerStyle={Styles.container}>
+      <View style={Styles.header}>
+        <TouchableOpacity onPress={fetchNotifications}>
+          <MaterialIcons name="notifications" size={30} color="#c2274b" />
+        </TouchableOpacity>
+      </View>
+      <View style={Styles.topContainer}>
+        <Image
+          source={require('../../assets/123.jpg')}
+          style={Styles.topImage}
+          resizeMode="cover"
         />
+        <View style={Styles.titleContainer}>
+          <Text style={Styles.titleText}>Nanny Net</Text>
+          <Text style={Styles.subtitleText}>  Enjoy exclusive benefits and offers by subscribing to our packages.
+          Visit our website for more details</Text>
+        </View>
       </View>
 
-      {/* List of suggested babysitters */}
-      <FlatList
-        data={filteredBabysitters}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={Styles.babysitterCard}
-            onPress={() => navigateToBabysitterDetails(item.id)}
-          >
-            <View>
-              <Text style={Styles.name}>{item.name}</Text>
-              <Text>{`${item.city}, ${item.country}`}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
+      <View style={Styles.buttonContainer}>
+        {/* <TouchableOpacity style={Styles.customButton}>
+          <Text style={Styles.buttonText}>Booking available</Text>
+        </TouchableOpacity> */}
+        <TouchableOpacity style={Styles.customButton}
+        onPress={() => navigation.navigate('Offers')}>
+          <Text style={Styles.buttonText}>Special Offers</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={Styles.customButton}
+        onPress={() => navigation.navigate('AllBabysitters')}>
+          <Text style={Styles.buttonText}>Request a Babysitter</Text>
+        </TouchableOpacity>
+      </View>
 
-      {/* "See All Babysitters" link at the bottom */}
-      <TouchableOpacity
-        style={Styles.seeAllLink}
-        onPress={() => navigation.navigate('AllBabysitters')}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
       >
-        <Text style={Styles.seeAllText}>See All Babysitters</Text>
-      </TouchableOpacity>
+        <View style={Styles.modalContainer}>
+          <View style={Styles.modalContent}>
+            <Text style={Styles.modalTitle}>Notifications</Text>
+            <TouchableOpacity
+              style={Styles.seeAllLinkmodel}
+              onPress={() => {
+                setModalVisible(false);
+                navigation.navigate('Notifications');
+              }}
+            >
+              <Text style={Styles.seeAllTextmodel}>See All</Text>
+            </TouchableOpacity>
+            {notifications.map((notification, index) => (
+              <View key={index} style={Styles.notificationCard}>
+                <Text style={Styles.notificationText}>{notification.message}</Text>
+                <Text style={Styles.notificationDate}>{new Date(notification.notificationDate).toLocaleDateString()}</Text>
+              </View>
+            ))}
+            <TouchableOpacity style={Styles.closeButton} onPress={() => setModalVisible(false)}>
+              <Text style={Styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <Footer navigation={navigation} />
-    </View>
+    </ScrollView>
   );
 };
 

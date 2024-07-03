@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "506438918148",
+    "project_id": "graduation-cb9d6",
+    "storage_bucket": "graduation-cb9d6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:506438918148:android:d9ffed4f2e5a34607ad551",
+        "android_client_info": {
+          "package_name": "com.Roa12.SecondTest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs_WpmI20-RgHh4i6U0DsPx0ucqRSrZcw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

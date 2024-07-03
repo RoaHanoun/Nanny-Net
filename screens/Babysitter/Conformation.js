@@ -1,22 +1,23 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-const Conformation = ({ navigation }) => {
+const Conformation = ({ navigation,route }) => {
+  const { totalSalary, orderData } = route.params;
+
   const handleGotIt = () => {
-    // Handle the action when "Got It" button is pressed
-    // You can navigate to another screen or perform other actions
-    // For now, let's navigate back to the home screen
-    navigation.navigate('Orders');
+    navigation.navigate('BindingOrder', { orderData, totalSalary });
   };
+  
 
   return (
     <View style={styles.container}>
+            <Text style={styles.title}>{totalSalary}$</Text>
+
       <Text style={styles.heading}>Request Submitted!</Text>
       <Text style={styles.subtitle}>
         Please wait for the nanny to approve your request and send you the video chat link.
       </Text>
 
-      {/* "Got It" button */}
       <TouchableOpacity style={styles.gotItButton} onPress={handleGotIt}>
         <Text style={styles.gotItButtonText}>Got It</Text>
       </TouchableOpacity>
@@ -31,6 +32,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color:  '#556b8d',
   },
   heading: {
     fontSize: 24,

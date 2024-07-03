@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import axios from 'axios';
 
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -7,20 +10,20 @@ const Login = ({ navigation }) => {
   const [usernameError, setUsernameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     let isError = false;
 
-    // Username validation
-    const usernameRegex = /^[a-zA-Z]{3,}$/;
-    if (!username || !usernameRegex.test(username)) {
-      setUsernameError('Username must be at least 3 characters and contain no numbers.');
+    // Validation for username (email)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!username || !emailRegex.test(username)) {
+      setUsernameError('Please enter a valid email.');
       isError = true;
     } else {
       setUsernameError('');
     }
 
-    // Password validation
-    const passwordRegex = /^(?=.*\d).{8,}$/;
+    // Validation for password
+    const passwordRegex = /^(?=.*\d).{6,}$/;
     if (!password || !passwordRegex.test(password)) {
       setPasswordError('Password must be at least 8 characters and contain a number.');
       isError = true;
@@ -33,12 +36,32 @@ const Login = ({ navigation }) => {
       return;
     }
 
-      // Simulating successful login, navigate to CreateProfile
-      navigation.navigate('CreateProfile');
-      
-    // Clear the input fields after the login button is clicked
-    setUsername('');
-    setPassword('');
+    try {
+      const response = await axios.post('http://176.119.254.188:8080/login', {
+        email: username,
+        password: password,
+      });
+
+      const { jwt, id, role } = response.data;
+
+      // Save token and user ID to AsyncStorage for future use
+      await AsyncStorage.setItem('jwt', jwt);
+      await AsyncStorage.setItem('id', id);
+
+      // Clear input fields
+      setUsername('');
+      setPassword('');
+
+      // Navigate based on the role
+      if (role === 'c') {
+        navigation.navigate('Babysitter');
+      } else if (role === 'e') {
+        navigation.navigate('BabysitterB');
+      }
+    } catch (error) {
+      console.error('Error logging in:', error);
+      Alert.alert('Error', 'Invalid username or password. Please try again.');
+    }
   };
 
   return (
@@ -73,19 +96,18 @@ const Login = ({ navigation }) => {
           </TouchableOpacity>
         </View>
         <View style={styles.signupButtonContainer}>
-          <TouchableOpacity style={styles.signupButton} onPress={() => navigation.navigate('Signup')}>
+          <TouchableOpacity style={styles.signupButton} onPress={() => navigation.navigate('Choose')}>
             <Text style={styles.signupButtonText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
       </View>
     </View>
-  );  
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // position: 'absolute',
   },
   overlay: {
     flex: 1,
@@ -163,22 +185,6 @@ const styles = StyleSheet.create({
     color: '#c2274b',
     fontSize: 15,
   },
-  // signupButtonContainer: {
-  //   position: 'absolute',
-  //   bottom: 40,
-  //   width: '100%',
-  //   alignItems: 'center',
-  // },
-  // signupButton: {
-  //   backgroundColor: 'white',
-  //   padding: 10,
-  //   borderRadius: 10,
-  //   borderColor: "#c2274b",
-  //   borderWidth: 1,
-  //   width: '75%',
-  //   alignItems: 'center',
-  // },
-  
   errorBorder: {
     borderColor: 'red',
   },

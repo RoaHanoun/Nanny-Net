@@ -9,7 +9,7 @@ const SplashScreen = ({ navigation }) => {
       setShowLogo(false);
       // Navigate to the next screen after the logo disappears
       navigation.replace('Main'); 
-    }, 8000); // Half a minute (30,000 milliseconds)
+    }, 4000); 
 
     return () => clearTimeout(timer);
   }, [navigation]);

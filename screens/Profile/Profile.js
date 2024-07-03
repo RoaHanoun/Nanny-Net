@@ -1,76 +1,177 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Styles from './Stayles'; // Import styles from the separate file
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Image, Text, TouchableOpacity, Alert, Linking } from 'react-native';
 import Footer from '../Footer/Footer'; // Import the Footer component
+import Icon from 'react-native-vector-icons/FontAwesome';
+import axios from 'axios'; // Import Axios
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import { Buffer } from 'buffer';
 
-const Profile = () => {
-  const navigation = useNavigation();
+const Profile = ({ navigation }) => {
+  const [userData, setUserData] = useState(null); // State to store user data
+  const [profileImageUrl, setProfileImageUrl] = useState(null); // State to store profile image URL
 
-  // Dummy data for the profile
-  const userProfile = [
-    {
-      name: 'Roa Hanoun',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      email: 'roahanoun@gmail.com',
-      // Add more profile data as needed
-    },
-    {
-      name: 'Malak',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      email: 'malak@example.com',
-      // Add more profile data as needed
-    },
-    {
-      name: 'Jane Doe',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      email: 'janedoe@example.com',
-      // Add more profile data as needed
-    },
-  ];
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const id = await AsyncStorage.getItem('id'); // Get user ID from AsyncStorage
+        const jwt = await AsyncStorage.getItem('jwt'); // Get JWT from AsyncStorage
 
-  // Choose the index of the profile you want to display
-  const profileIndex = 0; // You can change this index based on your requirements
+        if (id && jwt) {
+          const response = await axios.get(`http://176.119.254.188:8080/customer/${id}`, {
+            headers: {
+              Authorization: `Bearer ${jwt}`, // Include JWT in request headers
+            },
+          });
 
-  const handleEditProfile = () => {
-    // Navigate to the edit screen (replace 'EditProfile' with your actual edit screen name)
-    navigation.navigate('EditProfile', { userProfile: userProfile[profileIndex] });
+          setUserData(response.data); // Set the fetched user data to state
+          console.log('User Data:', response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        Alert.alert('Error', 'An unexpected error occurred while fetching user data. Please try again later.');
+      }
+    };
+
+    const fetchProfileImage = async () => {
+      try {
+        const id = await AsyncStorage.getItem('id');
+        if (id) {
+          console.log(`Fetching profile image for user ID: ${id}`);
+          const responseImage = await fetch(`http://176.119.254.188:8080/user/image/${id}`);
+          
+          if (responseImage.ok) {
+            const imageData = await responseImage.blob(); // Convert response to Blob
+            const base64Image = await convertBlobToBase64(imageData); // Convert Blob to base64
+            setProfileImageUrl(`data:image/jpeg;base64,${base64Image}`); // Use base64 string as image source
+            console.log('Profile image fetched successfully.');
+          } else {
+            // console.error('Failed to fetch profile image');
+            setProfileImageUrl(null); // Fallback to default image
+          }
+        } else {
+          console.warn('User ID not found in Async Storage.');
+        }
+      } catch (error) {
+        console.error('Error fetching profile image:', error);
+        Alert.alert('Error', 'An unexpected error occurred while fetching profile image. Please try again later.');
+      }
+    };
+    
+    const convertBlobToBase64 = (blob) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result.split(',')[1]; // Extract base64 string
+          resolve(base64data);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    };
+    
+    
+    fetchUserData();
+    fetchProfileImage();
+  }, []);
+
+  const handleEditPress = () => {
+    if (userData) {
+      navigation.navigate('EditProfile', { userData: userData });
+    }
+  };
+
+  const handleWebPress = () => {
+    Linking.openURL('https://www.facebook.com/roaa.hannon');
   };
 
   return (
-    <View style={Styles.container}>
-      {/* Cover photo */}
-      <Image
-        source={require('../../assets/123.jpg')} 
-        style={Styles.coverImage}
-        resizeMode="cover"
-      />
-
-      {/* Personal photo */}
-      <Image
-        source={require('../../assets/Profile.jpg')} 
-        style={Styles.profileImage}
-        resizeMode="cover"
-      />
-
-      {/* Name */}
-      <Text style={Styles.nameText}>{userProfile[profileIndex].name}</Text>
-
-      {/* Description */}
-      <Text style={Styles.descriptionText}>{userProfile[profileIndex].description}</Text>
-
-      {/* Email */}
-      <Text style={Styles.emailText}>{userProfile[profileIndex].email}</Text>
-
-      {/* Edit Profile button */}
-      <TouchableOpacity style={Styles.editButton} onPress={handleEditProfile}>
-        <Text style={Styles.editButtonText}>Edit</Text>
-      </TouchableOpacity>
-
-      {/* Footer */}
+    <View style={styles.container}>
+      {/* Render user data */}
+      {userData && (
+        <>
+          <Image
+            source={profileImageUrl ? { uri: profileImageUrl } : require('../../assets/Profile.jpg')}
+            style={styles.profilePic}
+          />
+          <Text style={styles.name}>{userData.user.name}</Text>
+          <Text style={styles.title}>{userData.user.email}</Text>
+        </>
+      )}
+      <View style={styles.menuContainer}>
+        {/* Render menu items */}
+        <MenuItem icon="pencil" text="Edit profile" onPress={handleEditPress} />
+        <MenuItem icon="cog" text="Settings" showBorder={true} onPress={() => navigation.navigate('Settings')} />
+        <View style={{ paddingTop: 40 }}></View>
+        <MenuItem icon="globe" text="See Our Web" onPress={handleWebPress} />
+        <MenuItem icon="question-circle" text="Help" onPress={() => navigation.navigate('HelpScreen')} />
+        <MenuItem icon="star" text="Rate Us" onPress={() => navigation.navigate('BlogScreen')}/>
+      </View>
       <Footer navigation={navigation} />
     </View>
   );
 };
+
+const MenuItem = ({ icon, text, showBorder, onPress }) => (
+  <TouchableOpacity
+    style={[
+      styles.menuItem,
+      showBorder ? styles.border : null, // Apply border style conditionally
+    ]}
+    onPress={onPress}
+  >
+    <Icon name={icon} size={20} color="#c2274b" />
+    <Text style={styles.menuText}>{text}</Text>
+    <Icon name="angle-right" size={20} color="#000" />
+  </TouchableOpacity>
+);
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#fff0ec',
+  },
+  profilePic: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  name: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginTop: 8,
+    color: 'black',
+  },
+  title: {
+    fontSize: 16,
+    color: 'gray',
+    marginBottom: 20,
+  },
+  menuContainer: {
+    width: '100%',
+    backgroundColor: '#fff',
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    borderTopEndRadius: 20,
+    borderTopStartRadius: 20,
+    paddingBottom: 150,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  menuText: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 18,
+  },
+  border: {
+    borderBottomColor: 'gray',
+    borderBottomWidth: 1,
+  },
+});
 
 export default Profile;

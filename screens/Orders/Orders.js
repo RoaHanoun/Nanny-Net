@@ -1,59 +1,81 @@
-// Orders.js
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Styles from './Stayles'; // Import styles from the separate file
+import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import Footer from '../Footer/Footer'; // Import the Footer component
-import Nav from '../Navbar/Nav'; // Import the Navbar component
-import OrderDetails from './OrderDetails';
 
 const Orders = () => {
   const navigation = useNavigation();
 
-  // Dummy data for past and current requests
-  const pastRequests = [
-    { id: '1', title: 'Past Request 1', date: '2023-01-01' },
-    { id: '2', title: 'Past Request 2', date: '2023-02-15' },
-    // Add more past requests as needed
-  ];
-
-  const currentRequests = [
-    { id: '3', title: 'Current Request 1', date: '2024-01-17' },
-    { id: '4', title: 'Current Request 2', date: '2024-02-28' },
-    // Add more current requests as needed
-  ];
-
-  // Combine past and current requests into one array
-  const allRequests = [...pastRequests, ...currentRequests];
-
+ 
   return (
-    <View style={Styles.container}>
-      {/* <Nav /> */}
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        
+      <View style={styles.orderCard} onTouchEnd={() => navigation.navigate('BindingOrder')}>
+          <FontAwesome5 name="clock" size={24} color="#c2274b" />
+          <Text style={styles.orderText}>Pending Orders</Text>
+          <MaterialIcons name="navigate-next" size={24} color="#c2274b" />
+        </View>
+        
+        <View style={styles.orderCard} onTouchEnd={() => navigation.navigate('AcceptedOrders')}>
+          <FontAwesome5 name="handshake" size={24} color="#c2274b" />
+          <Text style={styles.orderText}>Accepted Orders</Text>
+          <MaterialIcons name="navigate-next" size={24} color="#c2274b" />
+        </View>
 
-      {/* List of past and current requests */}
-      <FlatList
-        data={allRequests}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={Styles.requestBox}
-            onPress={() => {
-              // Navigate to OrderDetails and pass order information as params
-              navigation.navigate('OrderDetails', {
-                title: item.title,
-                date: item.date,
-              });
-            }}
-          >
-            <Text style={Styles.boldPinkText}>{item.title}</Text>
-            <Text>{`Date: ${item.date}`}</Text>
-          </TouchableOpacity>
-        )}
-      />
+        <View style={styles.orderCard} onTouchEnd={() => navigation.navigate('CurrentOrder')}>
+          <FontAwesome5 name="box-open" size={24} color="#c2274b" />
+          <Text style={styles.orderText}>Current Orders</Text>
+          <MaterialIcons name="navigate-next" size={24} color="#c2274b" />
+        </View>
+
+
+        <View style={styles.orderCard} onTouchEnd={() =>navigation.navigate('Past')}>
+          <MaterialIcons name="history" size={24} color="#c2274b" />
+          <Text style={styles.orderText}>Past Orders</Text>
+          <MaterialIcons name="navigate-next" size={24} color="#c2274b" />
+        </View>
+
+        <View style={styles.orderCard} onTouchEnd={() =>  navigation.navigate('OffersOrders')}>
+          <MaterialIcons name="today" size={24} color="#c2274b" />
+          <Text style={styles.orderText}>Offers Orders</Text>
+          <MaterialIcons name="navigate-next" size={24} color="#c2274b" />
+        </View>
+      </ScrollView>
 
       <Footer navigation={navigation} />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff0ec',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  orderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    margin: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  orderText: {
+    flex: 1,
+    fontSize: 18,
+    color: '#333',
+    marginLeft: 10,
+  },
+});
 
 export default Orders;

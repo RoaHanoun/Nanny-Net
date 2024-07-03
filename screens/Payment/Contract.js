@@ -12,6 +12,8 @@ import { Calendar } from 'react-native-calendars';
 import RNPickerSelect from 'react-native-picker-select';
 
 const Contract = ({ route, navigation }) => {
+  const { selectedBabysitters } = route.params;
+
   const [selectedDates, setSelectedDates] = useState([]);
   const [timeRanges, setTimeRanges] = useState([]);
   const [locationCity, setLocationCity] = useState('');
@@ -23,21 +25,26 @@ const Contract = ({ route, navigation }) => {
   const [additionalDesc, setAdditionalDesc] = useState('');
 
   const cities = [
-    { label: 'Select City', value: '' },
     { label: 'Nablus', value: 'Nablus' },
     { label: 'Ramallah', value: 'Ramallah' },
+    { label: 'Betlahem', value: 'Betlahem' },
+    { label: 'Rafat', value: 'Rafat' },
+    { label: 'Jenin', value: 'Jenin' },
+    { label: 'Tolkarem', value: 'Tolkarem' },
+    { label: 'Hebron', value: 'Hebron' },
+    { label: 'Quds', value: 'Quds' },
+    { label: 'sfas', value: 'sfas' },
   ];
 
-  const babysitterTypes = [
-    { label: 'Select Type', value: '' },
-    { label: 'Medical', value: 'Medical' },
-    { label: 'Above 5 years old', value: 'Above 5 years old' },
-    { label: 'Under 5 years old', value: 'Under 5 years old' },
-    { label: 'Special Care', value: 'Special Care' },
-  ];
+
+  // const babysitterTypes = [
+  //   { label: 'Medical', value: 'Medical' },
+  //   { label: 'Above 5 years old', value: 'Above 5 years old' },
+  //   { label: 'Under 5 years old', value: 'Under 5 years old' },
+  //   { label: 'Special Care', value: 'Special Care' },
+  // ];
 
   const genders = [
-    { label: 'Select Gender', value: '' },
     { label: 'Male', value: 'Male' },
     { label: 'Female', value: 'Female' },
   ];
@@ -67,17 +74,20 @@ const Contract = ({ route, navigation }) => {
       babysitterGender,
       additionalDesc,
     });
-       // Navigate to PaymentScreen with required data
-       navigation.navigate('Payment', {
-        totalSalary: calculateTotalSalary(), // Pass any necessary data to PaymentScreen
-       });
+
+    // Navigate to PaymentScreen with required data
+    navigation.navigate('Payment', {
+      totalSalary: calculateTotalSalary(), // Pass any necessary data to PaymentScreen
+    });
   };
+
   const calculateTotalSalary = () => {
     // Implement your logic to calculate total salary based on selected options
     // For example, you can calculate based on babysitterType, numberOfChildren, etc.
     // Return the calculated total salary
     return 100; // Replace with your actual calculation logic
-  }
+  };
+
   const isValidTimeRanges = (ranges) => {
     const regex = /^(1[0-2]|0?[1-9]):[0-5]?[0-9] (AM|PM|pm|am)$/i;
     return ranges.every(
@@ -110,28 +120,84 @@ const Contract = ({ route, navigation }) => {
           {selectedDates.map((date, index) => (
             <React.Fragment key={date}>
               <Text style={styles.title}>{`Time From (${date}):`}</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={(text) => {
-                  const updatedRanges = [...timeRanges];
-                  updatedRanges[index] = { ...updatedRanges[index], from: text };
-                  setTimeRanges(updatedRanges);
-                }}
-                value={timeRanges[index]?.from || ''}
-                placeholder="Enter time (HH:mm AM/PM)"
-              />
+              <View style={styles.timeContainer}>
+                <TextInput
+                  style={[styles.input, styles.timeInput]}
+                  onChangeText={(text) => {
+                    const updatedRanges = [...timeRanges];
+                    updatedRanges[index] = { ...updatedRanges[index], fromHour: text };
+                    setTimeRanges(updatedRanges);
+                  }}
+                  value={timeRanges[index]?.fromHour || ''}
+                  placeholder="HH"
+                  keyboardType="numeric"
+                  maxLength={2}
+                />
+                <Text>:</Text>
+                <TextInput
+                  style={[styles.input, styles.timeInput]}
+                  onChangeText={(text) => {
+                    const updatedRanges = [...timeRanges];
+                    updatedRanges[index] = { ...updatedRanges[index], fromMinute: text };
+                    setTimeRanges(updatedRanges);
+                  }}
+                  value={timeRanges[index]?.fromMinute || ''}
+                  placeholder="MM"
+                  keyboardType="numeric"
+                  maxLength={2}
+                />
+                <TextInput
+                  style={[styles.input, styles.timeInput]}
+                  onChangeText={(text) => {
+                    const updatedRanges = [...timeRanges];
+                    updatedRanges[index] = { ...updatedRanges[index], fromPeriod: text };
+                    setTimeRanges(updatedRanges);
+                  }}
+                  value={timeRanges[index]?.fromPeriod || ''}
+                  placeholder="AM/PM"
+                  maxLength={2}
+                />
+              </View>
 
               <Text style={styles.title}>{`Time To (${date}):`}</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={(text) => {
-                  const updatedRanges = [...timeRanges];
-                  updatedRanges[index] = { ...updatedRanges[index], to: text };
-                  setTimeRanges(updatedRanges);
-                }}
-                value={timeRanges[index]?.to || ''}
-                placeholder="Enter time (HH:mm AM/PM)"
-              />
+              <View style={styles.timeContainer}>
+                <TextInput
+                  style={[styles.input, styles.timeInput]}
+                  onChangeText={(text) => {
+                    const updatedRanges = [...timeRanges];
+                    updatedRanges[index] = { ...updatedRanges[index], toHour: text };
+                    setTimeRanges(updatedRanges);
+                  }}
+                  value={timeRanges[index]?.toHour || ''}
+                  placeholder="HH"
+                  keyboardType="numeric"
+                  maxLength={2}
+                />
+                <Text>:</Text>
+                <TextInput
+                  style={[styles.input, styles.timeInput]}
+                  onChangeText={(text) => {
+                    const updatedRanges = [...timeRanges];
+                    updatedRanges[index] = { ...updatedRanges[index], toMinute: text };
+                    setTimeRanges(updatedRanges);
+                  }}
+                  value={timeRanges[index]?.toMinute || ''}
+                  placeholder="MM"
+                  keyboardType="numeric"
+                  maxLength={2}
+                />
+                <TextInput
+                  style={[styles.input, styles.timeInput]}
+                  onChangeText={(text) => {
+                    const updatedRanges = [...timeRanges];
+                    updatedRanges[index] = { ...updatedRanges[index], toPeriod: text };
+                    setTimeRanges(updatedRanges);
+                  }}
+                  value={timeRanges[index]?.toPeriod || ''}
+                  placeholder="AM/PM"
+                  maxLength={2}
+                />
+              </View>
             </React.Fragment>
           ))}
 
@@ -156,14 +222,14 @@ const Contract = ({ route, navigation }) => {
             placeholder="Optional Description"
           />
 
-          <Text style={styles.title}>Babysitter Type:</Text>
+          {/* <Text style={styles.title}>Babysitter Type:</Text>
           <RNPickerSelect
             placeholder={{ label: 'Select Type', value: '' }}
             onValueChange={(value) => setBabysitterType(value)}
             items={babysitterTypes}
             value={babysitterType}
             style={styles.picker}
-          />
+          /> */}
 
           <Text style={styles.title}>Number of Children:</Text>
           <TextInput
@@ -230,7 +296,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
     borderRadius: 10,
-   // color: 'white',
   },
   picker: {
     height: 40,
@@ -252,5 +317,13 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '300',
+  },
+  timeContainer: {
+    flexDirection: 'row',
+  },
+  timeInput: {
+    width: 50,
+    marginRight: 10,
+    textAlign: 'center',
   },
 });
