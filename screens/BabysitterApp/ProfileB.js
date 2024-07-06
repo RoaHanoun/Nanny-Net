@@ -24,7 +24,7 @@ const ProfileB = ({ navigation }) => {
           });
 
           setUserData(response.data); // Set the fetched user data to state
-          console.log('User Data:', userData);
+          // console.log('User Data:', userData);
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -35,7 +35,7 @@ const ProfileB = ({ navigation }) => {
       try {
         const id = await AsyncStorage.getItem('id');
         if (id) {
-          console.log(`Fetching profile image for user ID: ${id}`);
+          // console.log(`Fetching profile image for user ID: ${id}`);
           const responseImage = await fetch(`http://176.119.254.188:8080/user/image/${id}`);
           
           if (responseImage.ok) {
@@ -44,7 +44,7 @@ const ProfileB = ({ navigation }) => {
             setProfileImageUrl(`data:image/jpeg;base64,${base64Image}`); // Use base64 string as image source
             console.log('Profile image fetched successfully.');
           } else {
-            console.error('Failed to fetch profile image');
+            // console.error('Failed to fetch profile image');
             setProfileImageUrl(null); // Fallback to default image
           }
         } else {
@@ -67,6 +67,8 @@ const ProfileB = ({ navigation }) => {
         reader.readAsDataURL(blob);
       });
     };
+    
+    
     fetchUserData();
     fetchProfileImage();
 
@@ -85,13 +87,12 @@ const ProfileB = ({ navigation }) => {
       {/* Render user data */}
       {userData && (
         <>
-         <Image
+          <Image
             source={profileImageUrl ? { uri: profileImageUrl } : require('../../assets/Profile.jpg')}
             style={styles.profilePic}
           />
           <Text style={styles.name}>{userData.user.name}</Text>
           <Text style={styles.title}>{userData.user.email}</Text>
-        
         </>
       )}
       <View style={styles.menuContainer}>

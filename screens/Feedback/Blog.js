@@ -90,6 +90,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginVertical: 10,
+    color: "#c2274b",
+
   },
   commentsContainer: {
     flex: 1,
@@ -97,7 +99,7 @@ const styles = StyleSheet.create({
   },
   commentContainer: {
     borderWidth: 1,
-    borderColor: '#c2274b',
+    borderColor: '#556b8d',
     borderRadius: 8,
     padding: 10,
     marginVertical: 5,

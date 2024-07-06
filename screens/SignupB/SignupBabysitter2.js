@@ -194,9 +194,10 @@ const SignupBabysitter2 = ({ navigation, route }) => {
               keyboardType="numeric"
               maxLength={2}
             />
+           
           </View>
           {dateError ? <Text style={styles.errorText}>{dateError}</Text> : null}
-
+          
           <TextInput
             style={[styles.input, accountNumberError && styles.errorBorder]}
             placeholder="Account Number (xxxx-xxxx-xxxx-xxxx)"

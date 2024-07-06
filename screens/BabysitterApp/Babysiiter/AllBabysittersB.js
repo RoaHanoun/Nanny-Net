@@ -19,12 +19,6 @@ const AllBabysittersB = ({ navigation }) => {
   const fetchData = async () => {
     try {
       let response;
-      
-      // if (selectedStars) {
-      //   fetchStarsData();
-      //   return;
-      // }
-
       // Fetch all employees if no filters are applied
       if (!selectedCities && !selectedType) {
         response = await axios.get('http://176.119.254.188:8080/admin/getAllEmployees');
@@ -67,7 +61,16 @@ const AllBabysittersB = ({ navigation }) => {
       console.error('Error fetching babysitters by stars:', error);
     }
   };
-
+  const fetchTypeData = async () => {
+    try {
+      response = await axios.post('http://176.119.254.188:8080/customer/filter/type', {
+        type: selectedType,
+      }); 
+        setBabysitters(response.data);
+    } catch (error) {
+      console.error('Error fetching babysitters by type:', error);
+    }
+  };
   const navigateToBabysitterDetails = (babysitterId) => {
     navigation.navigate('BabysitterDetailsB', { babysitterId });
   };
@@ -82,13 +85,11 @@ const AllBabysittersB = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-   
+         <Text style={styles.headerText}>Find your friends</Text>
+
       {/* Filter Button */}
-      <TouchableOpacity
-        style={styles.filterButton}
-        onPress={() => setModalVisible(true)}
-      >
-        <MaterialIcons name="filter-list" size={24} color="white" style={styles.filterButtonIcon} />
+      <TouchableOpacity style={styles.filterButton} onPress={() => setModalVisible(true)}>
+        <MaterialIcons name="filter-list" size={24} color="white" />
         <Text style={styles.filterButtonText}>Filter</Text>
       </TouchableOpacity>
 
@@ -139,6 +140,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+    color: '#556b8d',
+  },
   babysitterCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -184,15 +192,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   filterButton: {
-    top: 10,
-    right: 100,
-    backgroundColor: '#556b8d',
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    backgroundColor: '#556b8d',
+    padding: 15,
     borderRadius: 8,
     marginBottom: 10,
-    marginHorizontal: 120,
+    marginRight: 10,
+    marginTop: 10,
+    alignSelf: 'flex-end',
   },
   filterButtonText: {
     color: 'white',

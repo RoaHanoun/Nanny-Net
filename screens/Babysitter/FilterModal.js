@@ -16,7 +16,7 @@ const FilterModal = ({
 }) => {
   const [localCities, setLocalCities] = useState(selectedCities);
   const [localType, setLocalType] = useState(selectedType);
-  const [localStars, setLocalStars] = useState(selectedStars);
+  
 const starsOrder =() => {
   fetchStarsData(); // Call the new function if stars are selected
   setModalVisible(false);
@@ -25,16 +25,11 @@ const starsOrder =() => {
   const applyFilters = () => {
     setSelectedCities(localCities);
     setSelectedType(localType);
-    // setSelectedStars(localStars);
       fetchData();
     
 
     setModalVisible(false);
 
-    // Reset local state values to initial state
-    // setLocalCities([]);
-    // setLocalType(null);
-    // setLocalStars(null);
   };
 
   return (

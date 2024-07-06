@@ -32,8 +32,8 @@ const Settings = ({ navigation }) => {
 
           const { user, location } = response.data;
 
-          console.log('User Data:', user);
-          console.log('Location Data:', location);
+          // console.log('User Data:', user);
+          // console.log('Location Data:', location);
 
           setName(user?.name || '');
           setUsername(user?.username || '');

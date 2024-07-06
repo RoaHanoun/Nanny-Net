@@ -53,12 +53,12 @@ const AcceptedOrders = ({ navigation }) => {
     return unsubscribe;
   }, [navigation]);
 
-  // Function to group orders by a key (e.g., by babysitter name)
+  // Function to group orders by a key (e.g., by order date)
   const groupOrdersByKey = (orders, key) => {
     const groupedOrders = {};
 
     orders.forEach((order) => {
-      const keyValue = order[key];
+      const keyValue = new Date(order[key]).toDateString();
       if (!groupedOrders[keyValue]) {
         groupedOrders[keyValue] = [];
       }
@@ -75,13 +75,9 @@ const AcceptedOrders = ({ navigation }) => {
         <Text style={styles.headerText}>Accepted Orders</Text>
       </View>
 
-      {groupOrdersByKey(orders, 'employee.user.name').map(([key, ordersForKey]) => (
-        <TouchableOpacity
-          key={key}
-          style={styles.orderGroup}
-          onPress={() => navigateToOrderDetails(ordersForKey)}
-        >
-          <Text style={styles.babysitterName}>Babysitter Name: {key}</Text>
+      {groupOrdersByKey(orders, 'orderDate').map(([key, ordersForKey]) => (
+        <View key={key} style={styles.orderGroup}>
+          <Text style={styles.orderDate}>{key}</Text>
           <View style={styles.ordersContainer}>
             {ordersForKey.map((order) => (
               <TouchableOpacity
@@ -96,7 +92,7 @@ const AcceptedOrders = ({ navigation }) => {
               </TouchableOpacity>
             ))}
           </View>
-        </TouchableOpacity>
+        </View>
       ))}
     </ScrollView>
   );
@@ -135,7 +131,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
-  babysitterName: {
+  orderDate: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#556b8d',

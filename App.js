@@ -72,7 +72,12 @@ import BabysitterFeedback from './screens/Feedback/BabysitterFeedback';
 import BabysitterFeedback2 from './screens/Feedback/BabysitterFeedback2';
 import PasswordCodeVer from './screens/PasswordCodeVer';
 import NewPassword from './screens/NewPassword';
-
+import Location from './screens/Babysitter/Location';
+import OrderQRCode from './screens/OrderQRCode';
+import PastOrders from './screens/Orders/PastOrders';
+import PastOrderDetail from './screens/Orders/PastOrderDetail';
+import PastOrdersB from './screens/BabysitterApp/OrdersBabysitter/PastOrdersB';
+import PastOrderDetailB from './screens/BabysitterApp/OrdersBabysitter/PastOrderDetailB';
 const Stack = createNativeStackNavigator();
 
 const RootStack = () => {
@@ -145,6 +150,12 @@ const RootStack = () => {
       <Stack.Screen name="BabysitterFeedback2" component={BabysitterFeedback2} />
       <Stack.Screen name="PasswordCodeVer" component={PasswordCodeVer} />
       <Stack.Screen name="NewPassword" component={NewPassword} />
+      <Stack.Screen name="Location" component={Location} />
+      <Stack.Screen name="OrderQRCode" component={OrderQRCode} />
+      <Stack.Screen name="PastOrders" component={PastOrders} />
+      <Stack.Screen name="PastOrdersB" component={PastOrdersB} />
+      <Stack.Screen name="PastOrderDetail" component={PastOrderDetail} />
+      <Stack.Screen name="PastOrderDetailB" component={PastOrderDetailB} />
     </Stack.Navigator>
   );
 }

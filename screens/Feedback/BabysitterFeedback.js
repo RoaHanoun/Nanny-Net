@@ -40,7 +40,7 @@ const BabysitterFeedback = ({ route, navigation }) => {
           </View>
         </View>
       </View>
-      {/* <Text style={styles.feedbackText}>{item.comment}</Text> */}
+      {/* <Text style={styles.feedbackText}>{item.customer?.user?.id}</Text> */}
     </View>
   );
 

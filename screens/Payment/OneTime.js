@@ -27,7 +27,7 @@ const OneTime = ({ route, navigation }) => {
     { label: 'Tolkarem', value: 'Tolkarem' },
     { label: 'Hebron', value: 'Hebron' },
     { label: 'Quds', value: 'Quds' },
-    { label: 'sfas', value: 'sfas' },
+    { label: 'salfet', value: 'salfet' },
   ];
 
   const genders = [

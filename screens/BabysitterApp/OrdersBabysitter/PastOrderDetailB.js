@@ -1,52 +1,15 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const OrderDetail = ({ navigation, route }) => {
+const PastOrderDetailB = ({ navigation, route }) => {
   const { order } = route.params;
-
-  const handleCancel = async () => {
-    try {
-      // Retrieve the JWT token from AsyncStorage
-      const jwt = await AsyncStorage.getItem('jwt');
-      console.log(order.id);
-
-      // Check if the token exists
-      if (!jwt) {
-        console.error('Token not found in AsyncStorage');
-        return;
-      }
-
-      const data = {
-        orderId: order.id.toString(),
-      };
-
-      const response = await axios.post('http://176.119.254.188:8080/customer/order/cancel', data, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      });
-
-      console.log(data);
-
-      // Check the response status
-      if (response.status === 200) {
-        console.log('Order cancelled successfully:', response.data);
-        // If needed, navigate to another screen
-        navigation.navigate('BindingOrder');
-      } else {
-        console.error('Error cancelling order. Status:', response.status);
-      }
-    } catch (error) {
-      console.error('Error cancelling order:', error);
-    }
-  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Order Details</Text>
-
+    
       <View style={styles.detailsContainer}>
         <Text style={styles.detailText}>
           <Text style={styles.label}>Order Date:</Text> {order.orderDate}
@@ -71,7 +34,7 @@ const OrderDetail = ({ navigation, route }) => {
         </Text>
         {order.orderLocation && (
           <View style={styles.detailText}>
-            <Text style={styles.label}>Location:</Text>
+            <Text style={styles.label}>Order Location:</Text>
             <Text style={styles.sublabel}>City: {order.orderLocation.city}</Text>
             <Text style={styles.sublabel}>Street Data: {order.orderLocation.streetData}</Text>
             <Text style={styles.sublabel}>Description: {order.orderLocation.extraDescription}</Text>
@@ -81,10 +44,6 @@ const OrderDetail = ({ navigation, route }) => {
           <Text style={styles.label}>Babysitter:</Text> {order.employee?.user?.name}
         </Text>
       </View>
-
-      <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={handleCancel}>
-        <Text style={styles.buttonText}>Cancel</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -153,4 +112,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OrderDetail;
+export default PastOrderDetailB;

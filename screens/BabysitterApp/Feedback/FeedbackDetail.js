@@ -1,9 +1,12 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
 const FeedbackDetail = ({ route }) => {
   const { feedback } = route.params;
+
+  useEffect(() => {
+  }, [feedback]);
 
   const renderStars = (rating) => {
     const stars = [];
@@ -13,7 +16,7 @@ const FeedbackDetail = ({ route }) => {
           key={i}
           name={i < rating ? 'star' : 'star-o'}
           size={24}
-          color="#c2274b"
+          color="#FFD700"
           style={{ marginRight: 5 }}
         />
       );
@@ -22,52 +25,82 @@ const FeedbackDetail = ({ route }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Thank you for your effort </Text>
-      <View style={styles.feedbackInfo}>
-        <Text style={styles.label}>From: </Text>
-        <Text style={styles.value}>{feedback.customer.user.name}</Text>
-      </View>
-      <View style={styles.feedbackInfo}>
-        <Text style={styles.label}>Stars: </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          {renderStars(feedback.stars)}
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Thank you for your effort</Text>
+      <View style={styles.card}>
+        <View style={styles.feedbackInfo}>
+          <Text style={styles.label}>From:</Text>
+          <Text style={styles.value}>{feedback.customer.user.name}</Text>
+        </View>
+        <View style={styles.feedbackInfo}>
+          <Text style={styles.label}>Stars:</Text>
+          <View style={styles.starsContainer}>
+            {renderStars(feedback.stars)}
+          </View>
+        </View>
+        <View style={styles.feedbackInfo}>
+          <Text style={styles.label}>Comment:</Text>
+          <Text style={styles.comment}>{feedback.comment}</Text>
+        </View>
+        <View style={styles.feedbackInfo}>
+          <Text style={styles.label}>Feedback Date:</Text>
+          <Text style={styles.value}>{feedback.feedbackSubmittedDate}</Text>
         </View>
       </View>
-      <View style={styles.feedbackInfo}>
-        <Text style={styles.label}>Comment: </Text>
-        <Text style={styles.value}>{feedback.comment}</Text>
-      </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
+    flexGrow: 1,
+    backgroundColor: '#f2f2f2',
     padding: 20,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#556b8d',
-    marginBottom: 30,
+    color: '#333',
+    marginBottom: 20,
     textAlign: 'center',
   },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    width: '100%',
+  },
   feedbackInfo: {
-    flexDirection: 'row',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   label: {
     fontWeight: 'bold',
-    marginRight: 5,
     color: '#556b8d',
-    fontSize: 18,
+    fontSize: 16,
+    marginBottom: 5,
   },
   value: {
-    color: 'gray',
-    fontSize: 20,
+    color: '#333',
+    fontSize: 16,
+    marginLeft: 10,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  comment: {
+    color: '#555',
+    fontSize: 16,
+    marginLeft: 10,
   },
 });
 

@@ -4,7 +4,6 @@ import Footer from '../Footer/Footer'; // Import the Footer component
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios'; // Import Axios
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
-import { Buffer } from 'buffer';
 
 const Profile = ({ navigation }) => {
   const [userData, setUserData] = useState(null); // State to store user data
@@ -24,7 +23,7 @@ const Profile = ({ navigation }) => {
           });
 
           setUserData(response.data); // Set the fetched user data to state
-          console.log('User Data:', response.data);
+          // console.log('User Data:', response.data);
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -36,7 +35,7 @@ const Profile = ({ navigation }) => {
       try {
         const id = await AsyncStorage.getItem('id');
         if (id) {
-          console.log(`Fetching profile image for user ID: ${id}`);
+          // console.log(`Fetching profile image for user ID: ${id}`);
           const responseImage = await fetch(`http://176.119.254.188:8080/user/image/${id}`);
           
           if (responseImage.ok) {

@@ -83,6 +83,8 @@ const Babysitter = ({ navigation }) => {
         onPress={() => navigation.navigate('AllBabysitters')}>
           <Text style={Styles.buttonText}>Request a Babysitter</Text>
         </TouchableOpacity>
+
+        
       </View>
 
       <Modal

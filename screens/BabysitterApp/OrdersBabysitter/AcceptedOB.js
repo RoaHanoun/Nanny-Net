@@ -14,10 +14,7 @@ const AcceptedOB = ({ navigation }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      const onScreenFocus = () => {
-        fetchOrders(); // Refresh orders when the screen is focused
-      };
-      onScreenFocus();
+      fetchOrders(); // Refresh orders when the screen is focused
     }, [])
   );
 
@@ -39,9 +36,8 @@ const AcceptedOB = ({ navigation }) => {
     navigation.navigate('OrderDetailsB', { order });
   };
 
-
   const navigateBackToOrders = () => {
-    navigation.navigate('Orders');
+    navigation.navigate('OrdersB');
   };
 
   useEffect(() => {
@@ -57,6 +53,21 @@ const AcceptedOB = ({ navigation }) => {
     return unsubscribe;
   }, [navigation]);
 
+  // Function to group orders by a key (e.g., by order date)
+  const groupOrdersByKey = (orders, key) => {
+    const groupedOrders = {};
+
+    orders.forEach((order) => {
+      const keyValue = new Date(order[key]).toDateString();
+      if (!groupedOrders[keyValue]) {
+        groupedOrders[keyValue] = [];
+      }
+      groupedOrders[keyValue].push(order);
+    });
+
+    return Object.entries(groupedOrders);
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -64,19 +75,24 @@ const AcceptedOB = ({ navigation }) => {
         <Text style={styles.headerText}>Accepted Orders</Text>
       </View>
 
-      {orders.map((order) => (
-        <TouchableOpacity
-          key={order.id}
-          style={styles.orderCard}
-          onPress={() => navigateToOrderDetails(order)}
-        >
-          <Text style={styles.orderInfo}>Price: {order.price}$</Text>
-          <Text style={styles.orderInfo}>Babysitter Name: {order.employee.user.name}</Text>
-          <Text style={styles.orderInfo}>Order Date: {order.orderDate}</Text>
-          <Text style={styles.orderInfo}>Order Location: {order.orderLocation.city}</Text>
-          
-         
-        </TouchableOpacity>
+      {groupOrdersByKey(orders, 'orderDate').map(([key, ordersForKey]) => (
+        <View key={key} style={styles.orderGroup}>
+          <Text style={styles.orderDate}>{key}</Text>
+          <View style={styles.ordersContainer}>
+            {ordersForKey.map((order) => (
+              <TouchableOpacity
+                key={order.id}
+                style={styles.orderCard}
+                onPress={() => navigateToOrderDetails(order)}
+              >
+                <Text style={styles.orderInfo}>Order ID: {order.id}</Text>
+                <Text style={styles.orderInfo}>Price: {order.price}$</Text>
+                <Text style={styles.orderInfo}>Order Date: {order.orderDate}</Text>
+                <Text style={styles.orderInfo}>Order Location: {order.orderLocation.city}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
       ))}
     </ScrollView>
   );
@@ -104,10 +120,30 @@ const styles = StyleSheet.create({
     color: '#c2274b',
     marginLeft: 10,
   },
-  orderCard: {
+  orderGroup: {
     backgroundColor: '#fff0ec',
     borderRadius: 10,
     padding: 20,
+    marginBottom: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  orderDate: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#556b8d',
+    marginBottom: 10,
+  },
+  ordersContainer: {
+    marginTop: 10,
+  },
+  orderCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
     marginBottom: 10,
     elevation: 3,
     shadowColor: '#000',
@@ -119,19 +155,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#556b8d',
     marginBottom: 5,
-  },
-  feedbackButton: {
-    backgroundColor: '#c2274b',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
 

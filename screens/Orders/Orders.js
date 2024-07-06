@@ -31,7 +31,7 @@ const Orders = () => {
         </View>
 
 
-        <View style={styles.orderCard} onTouchEnd={() =>navigation.navigate('Past')}>
+        <View style={styles.orderCard} onTouchEnd={() =>navigation.navigate('PastOrders')}>
           <MaterialIcons name="history" size={24} color="#c2274b" />
           <Text style={styles.orderText}>Past Orders</Text>
           <MaterialIcons name="navigate-next" size={24} color="#c2274b" />

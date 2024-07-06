@@ -63,15 +63,15 @@ const OrderDetailsB = ({ navigation, route }) => {
           <Text style={styles.detailText}>
             <Text style={styles.label}>End Time:</Text> {order.endTime}
           </Text>
-          {/* <Text style={styles.detailText}>
-            <Text style={styles.label}>Order Status:</Text> {order.orderStatus}
-          </Text> */}
+          <Text style={styles.detailText}>
+            <Text style={styles.label}>Description:</Text> {order.describtion}
+          </Text>
           {order.customer && (
             <View style={styles.detailText}>
               <Text style={styles.label}>Customer Info:</Text>
               <Text style={styles.sublabel}>Name: {order.customer.user.name}</Text>
               <Text style={styles.sublabel}>Phone Number: {order.customer.user.telNumber}</Text>
-              <Text style={styles.sublabel}>Gender: {order.customer.user.gender}</Text>
+              {/* <Text style={styles.sublabel}>Gender: {order.customer.user.gender}</Text> */}
               <Text style={styles.sublabel}>Location: {order.customer.location.city}, {order.customer.location.streetData}</Text>
             </View>
           )}
@@ -80,6 +80,7 @@ const OrderDetailsB = ({ navigation, route }) => {
               <Text style={styles.label}>Order Location:</Text>
               <Text style={styles.sublabel}>City: {order.orderLocation.city}</Text>
               <Text style={styles.sublabel}>Street Data: {order.orderLocation.streetData}</Text>
+              <Text style={styles.sublabel}>Description: {order.orderLocation.extraDescription}</Text>
             </View>
           )}
         </View>

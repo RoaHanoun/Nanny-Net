@@ -39,21 +39,30 @@ const BindingOB = ({ navigation }) => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-      if (!e.data || !e.data.action) {
-        // If there is no action, let the default action happen
-        return;
+      // Check if the current screen is being removed
+      if (e.data.action.type === 'POP' && navigation.isFocused()) {
+        e.preventDefault(); // Prevent default action
+        navigateBackToOrders(); // Navigate to 'Orders' screen
       }
-      if (e.data.action.type === 'POP') {
-        // Only navigate back to 'Orders' screen if the action is not 'POP'
-        return;
-      }
-      e.preventDefault(); // Prevent default action
-      navigateBackToOrders(); // Navigate to 'OrdersB' screen
     });
   
     return unsubscribe;
-  }, [navigation]);
-  
+  }, [navigation, navigateBackToOrders]);
+
+  // Function to group orders by date
+  const groupOrdersByDate = (orders) => {
+    const groupedOrders = {};
+
+    orders.forEach((order) => {
+      const date = new Date(order.orderDate).toDateString(); // Grouping by date string
+      if (!groupedOrders[date]) {
+        groupedOrders[date] = [];
+      }
+      groupedOrders[date].push(order);
+    });
+
+    return Object.entries(groupedOrders);
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -62,17 +71,24 @@ const BindingOB = ({ navigation }) => {
         <Text style={styles.headerText}>Pending Orders</Text>
       </View>
 
-      {orders.map((order) => (
-        <TouchableOpacity
-          key={order.id}
-          style={styles.orderCard}
-          onPress={() => navigateToOrderDetails(order)}
-        >
-          <Text style={styles.orderInfo}>Order ID: {order.id}</Text>
-          <Text style={styles.orderInfo}>Price: {order.price}$</Text>
-          <Text style={styles.orderInfo}>Num of Kids: {order.numOfKids}</Text>
-          <Text style={styles.orderInfo}>Order Date: {order.orderDate}</Text>
-        </TouchableOpacity>
+      {groupOrdersByDate(orders).map(([dateGroup, ordersInGroup]) => (
+        <View key={dateGroup} style={styles.orderGroup}>
+          <Text style={styles.dateGroupText}>{dateGroup}</Text>
+          <View style={styles.ordersContainer}>
+            {ordersInGroup.map((order) => (
+              <TouchableOpacity
+                key={order.id}
+                style={styles.orderCard}
+                onPress={() => navigateToOrderDetails(order)}
+              >
+                <Text style={styles.orderInfo}>Order ID: {order.id}</Text>
+                <Text style={styles.orderInfo}>Payment: {order.price}$</Text>
+                <Text style={styles.orderInfo}>Num of Kids: {order.numOfKids}</Text>
+                <Text style={styles.orderInfo}>Order Date: {order.orderDate}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
       ))}
     </ScrollView>
   );
@@ -100,10 +116,30 @@ const styles = StyleSheet.create({
     color: '#c2274b',
     marginLeft: 10,
   },
-  orderCard: {
+  orderGroup: {
     backgroundColor: '#fff0ec',
     borderRadius: 10,
     padding: 20,
+    marginBottom: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  dateGroupText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#556b8d',
+    marginBottom: 10,
+  },
+  ordersContainer: {
+    marginTop: 10,
+  },
+  orderCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
     marginBottom: 10,
     elevation: 3,
     shadowColor: '#000',

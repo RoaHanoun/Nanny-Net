@@ -72,8 +72,9 @@ const EditProfile = ({ navigation, route }) => {
       if (response.ok) {
         const updatedImageUrl = await response.text();
         setProfileImage(updatedImageUrl);
-        console.log('Uploaded Image URL:', updatedImageUrl);
+        // console.log('Uploaded Image URL:', updatedImageUrl);
         Alert.alert('Success', 'Profile picture updated successfully!');
+        navigation.replace('Profile');
       } else {
         console.error('Failed to upload image');
         Alert.alert('Error', 'Failed to upload image. Please try again later.');

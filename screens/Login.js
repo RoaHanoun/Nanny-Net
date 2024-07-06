@@ -91,6 +91,11 @@ const Login = ({ navigation }) => {
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
+
+           <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('OrderQRCode', 4567)}>
+            <Text style={styles.buttonText}>QR</Text>
+          </TouchableOpacity> 
+
           <TouchableOpacity onPress={() => navigation.navigate('ForgetPassword')}>
             <Text style={styles.forgetPassword}>Forget Password?</Text>
           </TouchableOpacity>

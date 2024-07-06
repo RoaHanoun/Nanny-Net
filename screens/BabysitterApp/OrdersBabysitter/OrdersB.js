@@ -7,10 +7,6 @@ import FooterB from '../../Footer/FooterB'; // Import the Footer component
 const OrdersB = () => {
   const navigation = useNavigation();
 
-  const navigateToOrderDetail = (orderType) => {
-    navigation.navigate('OrderDetails', { orderType });
-  };
-
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
@@ -32,19 +28,12 @@ const OrdersB = () => {
           <MaterialIcons name="navigate-next" size={24} color="#c2274b" />
         </View>
 
-     
-
-        <View style={styles.orderCard} onTouchEnd={() => navigateToOrderDetail('past')}>
+             <View style={styles.orderCard} onTouchEnd={() => navigation.navigate('PastOrdersB')}>
           <MaterialIcons name="history" size={24} color="#c2274b" />
           <Text style={styles.orderText}>Past Order</Text>
           <MaterialIcons name="navigate-next" size={24} color="#c2274b" />
         </View>
 
-        {/* <View style={styles.orderCard} onTouchEnd={() => navigateToOrderDetail('reschedule')}>
-          <MaterialIcons name="today" size={24} color="#c2274b" />
-          <Text style={styles.orderText}>Reschedule Order</Text>
-          <MaterialIcons name="navigate-next" size={24} color="#c2274b" />
-        </View> */}
       </ScrollView>
 
       <FooterB navigation={navigation} />

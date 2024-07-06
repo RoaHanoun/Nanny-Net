@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, StyleSheet, Alert, Image, TouchableOpacity, ScrollView } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker
 
 const EditProfileB = ({ navigation, route }) => {
   const { userData } = route.params;
@@ -11,13 +12,23 @@ const EditProfileB = ({ navigation, route }) => {
     navigation.replace('ProfileB');
   };
 
+  // useEffect(() => {
+  //   (async () => {
+  //     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  //     if (status !== 'granted') {
+  //       Alert.alert('Permission Required', 'Permission to access camera roll is required!');
+  //     }
+  //   })();
+  // }, []);
+
+  const [profileImage, setProfileImage] = useState(userData?.user?.profileImageUrl || '');
   const [name, setName] = useState(userData?.user?.name || '');
-  const [username, setUsername] = useState(userData?.user?.username || '');
+  const [username] = useState(userData?.user?.username || ''); // Non-editable
   const [email, setEmail] = useState(userData?.user?.email || '');
   const [city, setCity] = useState(userData?.city || '');
   const [phone, setPhone] = useState(userData?.user?.telNumber || '');
   const [description, setDescription] = useState(userData?.user?.describtion || '');
-  const [gender, setGender] = useState(userData?.user?.gender || '');
+  const [gender] = useState(userData?.user?.gender || ''); // Non-editable
   const [accountNumber, setAccountNumber] = useState(userData?.accountNumber || '');
 
   const validateAccountNumber = (text) => {
@@ -74,16 +85,13 @@ const EditProfileB = ({ navigation, route }) => {
       };
 
       try {
-        // Get the token from AsyncStorage
-        const token = await AsyncStorage.getItem('jwt'); // Adjust the key according to your implementation
+        const token = await AsyncStorage.getItem('jwt');
 
-        // If token is not available, handle the case accordingly
         if (!token) {
           console.error('Token not found.');
           return;
         }
 
-        // Add token to request headers
         const config = {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -91,26 +99,96 @@ const EditProfileB = ({ navigation, route }) => {
           },
         };
 
-        // Make POST request with token included in headers
         const response = await axios.post('http://176.119.254.188:8080/provider/edit', userData, config);
         console.log('API Response:', response.data);
         Alert.alert('Success', 'Profile updated successfully!', [
-          { text: 'OK', onPress: refreshScreen } // Call the refresh function after dismissing the alert
+          { text: 'OK', onPress: refreshScreen }
         ]);
+        // Upload profile image if selected
+       if (profileImage) {
+        await handleImageUpload();
+        }
+
       } catch (error) {
         console.error('API Error:', error);
-        // Handle error
+        Alert.alert('Error', 'An error occurred while updating the profile. Please try again later.');
       }
+    }
+  };
+
+  
+  const selectImage = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (!permissionResult.granted) {
+        Alert.alert('Permission Required', 'Permission to access camera roll is required!');
+        return;
+      }
+      
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+      
+      if (!result.canceled) {
+        setProfileImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error selecting image:', error);
+      Alert.alert('Error', 'An error occurred while selecting the image.');
+    }
+  };
+   // Function to handle image upload
+   const handleImageUpload = async () => {
+    const formData = new FormData();
+    const uriParts = profileImage.split('.');
+    const fileType = uriParts[uriParts.length - 1];
+
+    formData.append('image', {
+      uri: profileImage,
+      name: `profile.${fileType}`,
+      type: `image/${fileType}`,
+    });
+
+    try {
+      const jwt = await AsyncStorage.getItem('jwt');
+
+      const response = await fetch('http://176.119.254.188:8080/upload/profile/image', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${jwt}`,
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const updatedImageUrl = await response.text();
+        setProfileImage(updatedImageUrl);
+        // console.log('Uploaded Image URL:', updatedImageUrl);
+        Alert.alert('Success', 'Profile picture updated successfully!');
+        navigation.replace('ProfileB');
+      } else {
+        console.error('Failed to upload image');
+        Alert.alert('Error', 'Failed to upload image. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      Alert.alert('Error', 'An error occurred while uploading the image. Please try again later.');
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <TouchableOpacity style={styles.photoUpload}>
-        <Image
-          source={require('../../assets/Profile.jpg')} // Replace with your image path
-          style={styles.profilePic}
-        />
+      <TouchableOpacity style={styles.photoUpload} onPress={selectImage}>
+        {profileImage ? (
+          <Image source={{ uri: profileImage }} style={styles.profilePic} resizeMode="cover" />
+        ) : (
+          <Image source={require('../../assets/camera_icon.png')} style={styles.cameraIcon} />
+        )}
       </TouchableOpacity>
       <TextInput
         value={name}
@@ -120,10 +198,10 @@ const EditProfileB = ({ navigation, route }) => {
       />
       <TextInput
         value={username}
-        onChangeText={setUsername}
+        onChangeText={() => null}
         placeholder={userData?.user?.username ? '' : 'Username'}
-        style={[styles.input, { backgroundColor: '#f0f0f0', color: '#888' }]} // Disabled style
-        editable={false} // Make it uneditable
+        style={[styles.input, { backgroundColor: '#f0f0f0', color: '#888' }]}
+        editable={false}
       />
       <TextInput
         value={email}
@@ -136,15 +214,14 @@ const EditProfileB = ({ navigation, route }) => {
         items={[
           { label: 'Nablus', value: 'Nablus' },
           { label: 'Ramallah', value: 'Ramallah' },
-          { label: 'BeithLehem', value: 'BeithLehem' },
+          { label: 'Bethlehem', value: 'Bethlehem' },
           { label: 'Rafat', value: 'Rafat' },
           { label: 'Jenin', value: 'Jenin' },
-          { label: 'Tolkarem', value: 'Tolkarem' },
+          { label: 'Tulkarem', value: 'Tulkarem' },
           { label: 'Hebron', value: 'Hebron' },
           { label: 'Quds', value: 'Quds' },
-          { label: 'Salfeet', value: 'Salfeet' },
-          { label: 'Beit sahour', value: 'Beit sahour' },
-
+          { label: 'Salfit', value: 'Salfit' },
+          { label: 'Beit Sahour', value: 'Beit Sahour' },
         ]}
         style={pickerSelectStyles}
         placeholder={{ label: userData?.user?.city || 'Select City...', value: null }}
@@ -165,9 +242,10 @@ const EditProfileB = ({ navigation, route }) => {
       />
       <TextInput
         value={gender}
-        editable={false}
+        onChangeText={() => null}
         placeholder="Gender"
-        style={[styles.input, { backgroundColor: '#f0f0f0', color: '#888' }]} // Disabled style
+        style={[styles.input, { backgroundColor: '#f0f0f0', color: '#888' }]}
+        editable={false}
       />
       <TextInput
         style={styles.input}
@@ -178,7 +256,7 @@ const EditProfileB = ({ navigation, route }) => {
       />
 
       <TouchableOpacity onPress={handleSubmit} style={styles.button}>
-        <Text style={styles.buttonText}>Submit</Text>
+        <Text style={styles.buttonText}>Confirm</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -188,39 +266,43 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 10,
-    backgroundColor: '#fff0ec', // Background color
+    backgroundColor: '#fff0ec',
+  },
+  photoUpload: {
+    alignSelf: 'center',
+    marginBottom: 15,
+  },
+  profilePic: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  cameraIcon: {
+    width: 100,
+    height: 100,
   },
   input: {
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
-    borderRadius: 20, // Border radius for fields
-    marginBottom: 15, // Padding between fields
+    borderRadius: 20,
+    marginBottom: 15,
     padding: 10,
-  },
-  photoUpload: {
-    alignSelf: 'center',
-    marginBottom: 15, // Padding below the photo upload
-  },
-  profilePic: {
-    width: 100,
-    height: 100,
-    borderRadius: 50, // Make it circular
   },
   button: {
     backgroundColor: '#c2274b',
     padding: 10,
     borderRadius: 50,
-    alignItems: 'center', // Center text horizontally
-    justifyContent: 'center', // Center text vertically
-    height: 50, // Button height
-    width: '80%', // Button width
-    marginTop: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 50,
+    width: '80%',
+    marginTop: 70,
     alignSelf: 'center',
   },
   buttonText: {
-    color: '#fff', // Text color
-    fontSize: 16, // Text font size
+    color: '#fff',
+    fontSize: 16,
   },
 });
 

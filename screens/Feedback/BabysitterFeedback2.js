@@ -2,26 +2,44 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons'; // Make sure you have this package installed
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BabysitterFeedback2 = ({ route, navigation }) => {
   const { babysitterId } = route.params;
   const [feedbackData, setFeedbackData] = useState([]);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    fetchFeedback();
-  }, []);
+    const fetchUserIdAndFeedback = async () => {
+      try {
+        const id = await AsyncStorage.getItem('id');
+        if (!id) {
+          console.error('User ID not found.');
+          return;
+        }
+        setUserId(id);
 
-  const fetchFeedback = async () => {
-    try {
-      const response = await axios.post('http://176.119.254.188:8080/customer/feedback/search/employee', {
-        employeeId: babysitterId,
-      });
-      setFeedbackData(response.data);
-    } catch (error) {
-      console.error('Error fetching feedback:', error);
-      Alert.alert('Error', 'Failed to fetch feedback. Please try again later.');
-    }
-  };
+        const response = await axios.post('http://176.119.254.188:8080/customer/feedback/search/employee', {
+          employeeId: babysitterId,
+        });
+
+        if (response && response.data) {
+          const allFeedback = response.data;
+          // Filter feedback for the current user
+          const userFeedback = allFeedback.filter(item => item.customer?.user?.id === parseInt(id));
+          setFeedbackData(userFeedback);
+        } else {
+          console.log('No data returned from API');
+          setFeedbackData([]);
+        }
+      } catch (error) {
+        console.error('Error fetching feedback:', error);
+        Alert.alert('Error', 'Failed to fetch feedback. Please try again later.');
+      }
+    };
+
+    fetchUserIdAndFeedback();
+  }, [babysitterId]);
 
   const renderItem = ({ item }) => (
     <View style={styles.feedbackCard}>

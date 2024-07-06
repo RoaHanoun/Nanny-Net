@@ -57,19 +57,26 @@ const CurrentOrder = ({ navigation }) => {
     return unsubscribe;
   }, [navigation]);
 
-  // Function to group orders by a key (e.g., by babysitter name)
-  const groupOrdersByKey = (orders, key) => {
+  // Function to group orders by date and babysitter name
+  const groupOrdersByDateAndName = (orders) => {
     const groupedOrders = {};
 
     orders.forEach((order) => {
-      const keyValue = order[key];
-      if (!groupedOrders[keyValue]) {
-        groupedOrders[keyValue] = [];
+      const date = new Date(order.orderDate).toDateString();
+      const babysitterName = order.employee.user.name;
+      const key = `${babysitterName}-${date}`;
+      
+      if (!groupedOrders[key]) {
+        groupedOrders[key] = {
+          babysitterName,
+          date,
+          orders: [],
+        };
       }
-      groupedOrders[keyValue].push(order);
+      groupedOrders[key].orders.push(order);
     });
 
-    return Object.entries(groupedOrders);
+    return Object.values(groupedOrders);
   };
 
   return (
@@ -79,15 +86,12 @@ const CurrentOrder = ({ navigation }) => {
         <Text style={styles.headerText}>Current Orders</Text>
       </View>
 
-      {groupOrdersByKey(orders, 'employee.user.name').map(([key, ordersForKey]) => (
-        <TouchableOpacity
-          key={key}
-          style={styles.orderGroup}
-          onPress={() => navigateToOrderDetails(ordersForKey)}
-        >
-          <Text style={styles.babysitterName}>Babysitter Name: {key}</Text>
+      {groupOrdersByDateAndName(orders).map(({ babysitterName, date, orders }) => (
+        <View key={babysitterName + date} style={styles.orderGroup}>
+          <Text style={styles.titleText}>{date}</Text>
+          {/* <Text style={styles.babysitterName}>Babysitter Name: {babysitterName}</Text> */}
           <View style={styles.ordersContainer}>
-            {ordersForKey.map((order) => (
+            {orders.map((order) => (
               <TouchableOpacity
                 key={order.id}
                 style={styles.orderCard}
@@ -107,7 +111,7 @@ const CurrentOrder = ({ navigation }) => {
               </TouchableOpacity>
             ))}
           </View>
-        </TouchableOpacity>
+        </View>
       ))}
     </ScrollView>
   );
@@ -146,9 +150,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
-  babysitterName: {
+  titleText: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#556b8d',
+    marginBottom: 10,
+  },
+  babysitterName: {
+    fontSize: 16,
     color: '#556b8d',
     marginBottom: 10,
   },

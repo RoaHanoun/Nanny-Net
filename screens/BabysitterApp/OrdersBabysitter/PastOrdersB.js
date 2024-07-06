@@ -5,8 +5,12 @@ import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BindingOrder = ({ navigation }) => {
+const PastOrdersB = ({ navigation }) => {
   const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -17,8 +21,7 @@ const BindingOrder = ({ navigation }) => {
   const fetchOrders = async () => {
     try {
       const token = await AsyncStorage.getItem('jwt');
-
-      const response = await axios.get('http://176.119.254.188:8080/customer/orders/pending', {
+      const response = await axios.get('http://176.119.254.188:8080/provider/order/history', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -30,35 +33,36 @@ const BindingOrder = ({ navigation }) => {
   };
 
   const navigateToOrderDetails = (order) => {
-    navigation.navigate('OrderDetail', { order });
+    navigation.navigate('PastOrderDetailB', { order });
   };
 
   const navigateBackToOrders = () => {
-    navigation.navigate('Orders');
+    navigation.navigate('OrdersB');
   };
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-      // Check if the current screen is being removed
-      if (e.data.action.type === 'POP' && navigation.isFocused()) {
-        e.preventDefault(); // Prevent default action
-        navigateBackToOrders(); // Navigate to 'Orders' screen
+      if (e.data.action.type === 'POP') {
+        // Only navigate back to 'Orders' screen if the action is not 'POP'
+        return;
       }
+      e.preventDefault(); // Prevent default action
+      navigateBackToOrders(); // Navigate to 'Orders' screen
     });
-  
-    return unsubscribe;
-  }, [navigation, navigateBackToOrders]);
 
-  // Function to group orders by date
-  const groupOrdersByDate = (orders) => {
+    return unsubscribe;
+  }, [navigation]);
+
+  // Function to group orders by a key (e.g., by order date)
+  const groupOrdersByKey = (orders, key) => {
     const groupedOrders = {};
 
     orders.forEach((order) => {
-      const date = new Date(order.orderDate).toDateString(); // Grouping by date string
-      if (!groupedOrders[date]) {
-        groupedOrders[date] = [];
+      const keyValue = new Date(order[key]).toDateString();
+      if (!groupedOrders[keyValue]) {
+        groupedOrders[keyValue] = [];
       }
-      groupedOrders[date].push(order);
+      groupedOrders[keyValue].push(order);
     });
 
     return Object.entries(groupedOrders);
@@ -67,15 +71,15 @@ const BindingOrder = ({ navigation }) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <FontAwesome5 name="handshake" size={24} color="#c2274b" />
-        <Text style={styles.headerText}>Pending Orders</Text>
+        <FontAwesome5 name="box-open" size={24} color="#c2274b" />
+        <Text style={styles.headerText}>Past Orders</Text>
       </View>
 
-      {groupOrdersByDate(orders).map(([dateGroup, ordersInGroup]) => (
-        <View key={dateGroup} style={styles.orderGroup}>
-          <Text style={styles.dateGroupText}>{dateGroup}</Text>
+      {groupOrdersByKey(orders, 'orderDate').map(([key, ordersForKey]) => (
+        <View key={key} style={styles.orderGroup}>
+          <Text style={styles.orderDate}>{key}</Text>
           <View style={styles.ordersContainer}>
-            {ordersInGroup.map((order) => (
+            {ordersForKey.map((order) => (
               <TouchableOpacity
                 key={order.id}
                 style={styles.orderCard}
@@ -83,8 +87,8 @@ const BindingOrder = ({ navigation }) => {
               >
                 <Text style={styles.orderInfo}>Order ID: {order.id}</Text>
                 <Text style={styles.orderInfo}>Price: {order.price}$</Text>
-                <Text style={styles.orderInfo}>Num of Kids: {order.numOfKids}</Text>
                 <Text style={styles.orderInfo}>Order Date: {order.orderDate}</Text>
+                <Text style={styles.orderInfo}>Order Location: {order.orderLocation.city}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -127,7 +131,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
-  dateGroupText: {
+  orderDate: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#556b8d',
@@ -154,4 +158,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BindingOrder;
+export default PastOrdersB;

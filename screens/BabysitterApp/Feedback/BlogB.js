@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -38,10 +38,10 @@ const BlogB = () => {
   };
 
   const renderFeedbacks = () => {
-    return feedbacks.map((feedback) => (
-      <TouchableOpacity key={feedback.id} style={styles.commentContainer} onPress={() => handleViewFeedbackDetail(feedback)}>
+    return feedbacks.map((feedback, index) => (
+      <TouchableOpacity key={feedback.id} style={[styles.commentContainer, index === feedbacks.length - 1 && styles.lastCommentContainer]} onPress={() => handleViewFeedbackDetail(feedback)}>
         <View style={styles.commentHeader}>
-          <Image source={feedback.profileImage} style={styles.profileImage} />
+          <Image source={{ uri: feedback.profileImage }} style={styles.profileImage} />
           <Text style={styles.parentName}>From: {feedback.customer.user.name}</Text>
         </View>
         <Text style={styles.commentText}>{feedback.comment}</Text>
@@ -51,22 +51,27 @@ const BlogB = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header image and sentence */}
-      <Image
-        source={require('../../../assets/blog.jpg')} 
-        style={styles.headerImage}
-        resizeMode="cover"
-      />
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+       {/* Header image and sentence */}
+       <Image
+          source={require('../../../assets/blog.jpg')} 
+          style={styles.headerImage}
+          resizeMode="cover"
+        />
       <Text style={styles.headerText}>Welcome to Our Blog</Text>
 
-      {/* Feedbacks */}
-      <ScrollView style={styles.commentsContainer}>
+      <ScrollView contentContainerStyle={styles.scrollView}>
+       
+
+        {/* Feedbacks */}
         {renderFeedbacks()}
       </ScrollView>
-      <FooterB navigation={navigation} />
 
-    </View>
+      <FooterB navigation={navigation} />
+    </KeyboardAvoidingView>
   );
 };
 
@@ -84,17 +89,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginVertical: 10,
+    color: "#c2274b",
+
   },
-  commentsContainer: {
-    flex: 1,
-    padding: 10,
+  scrollView: {
+    flexGrow: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
   },
   commentContainer: {
     borderWidth: 1,
-    borderColor: '#c2274b',
+    borderColor: '#556b8d',
     borderRadius: 8,
     padding: 10,
     marginVertical: 5,
+  },
+  lastCommentContainer: {
+    marginBottom: 100, // Adjust this value as needed to ensure last item is fully visible
   },
   commentHeader: {
     flexDirection: 'row',
@@ -110,6 +121,8 @@ const styles = StyleSheet.create({
   parentName: {
     fontWeight: 'bold',
     fontSize: 16,
+    // color: "#c2274b",
+
   },
   commentText: {
     color: '#556b8d',
